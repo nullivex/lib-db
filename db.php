@@ -41,15 +41,22 @@ class Db {
 	public function connect(){
 		try{
 			$this->pdo = new PDO(
-				$this->config['driver'].':dbname='.$this->config['database'].
-				';host='.$this->config['host'].';port='.$this->config['port'],
-				$this->config['user'],
-				$this->config['password'],
-				array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION)
+				sprintf(
+					'%s:dbname=%s;host=%s;port=%i',
+					$this->config['driver'],
+					$this->config['database'],
+					$this->config['host'],
+					$this->config['port']
+				)
+				,$this->config['user']
+				,$this->config['password']
+				,array(
+					 PDO::ATTR_ERRMODE				=>	PDO::ERRMODE_EXCEPTION
+					,PDO::ATTR_DEFAULT_FETCH_MODE	=>	PDO::FETCH_ASSOC
+				)
 			);
 			$this->connected = true;
-		}
-		catch(PDOException $error){
+		} catch(PDOException $error){
 			$this->connected = false;
 			throw new Exception("Database Connection Failed: ".$error->getMessage());
 		}
@@ -77,6 +84,48 @@ class Db {
 
 	public function close(){
 		static $inst = false;
+	}
+
+	public function run($stmt,$params=array()){
+		$query = $this->prepare($stmt);
+		$query->execute($params);
+		return $query;
+	}
+
+	public function insert($table,$params=array()){
+		$stmt = sprintf(
+			'INSERT INTO `%s` (%s) VALUES (%s)'
+			,$table
+			,rtrim('`'.implode('`,`',array_keys($params)),'`,').'`'
+			,rtrim(str_repeat('?,',count($params)),',')
+		);
+		$this->run($stmt,array_values($params));
+		return $this->lastInsertId();
+	}
+
+	public function update($table,$primary_key,$primary_key_value,$params=array()){
+		if(!count($params)) throw new Exception('No data provided for update to: '.$table);
+		$stmt = sprintf(
+			'UPDATE `%s` SET %s WHERE `%s` = ?'
+			,$table
+			,rtrim('`'.implode('` = ?, `',array_keys($params)),',`').'` = ?'
+			,$primary_key
+		);
+		array_push($params,$primary_key_value);
+		return $this->run($stmt,array_values($params));
+	}
+
+	public function fetch($stmt,$params=array(),$throw_exception=false,$except_code=null){
+		$query = $this->run($stmt,$params);
+		$result = $query->fetch();
+		$query->closeCursor();
+		if(!$result && $throw_exception !== false) throw new Exception($throw_exception,$except_code);
+		return $result;
+	}
+
+	public function fetchAll($stmt,$params=array()){
+		$query = $this->run($stmt,$params);
+		return $query->fetchAll();
 	}
 
 	public function __call($function_name, $parameters) {
