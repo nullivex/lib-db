@@ -92,7 +92,8 @@ class Db {
 		return $query;
 	}
 
-	public function insert($table,$params=array()){
+	public function insert($table,$params=array(),$update_if_exists=false){
+		if($update_if_exists) return $this->insertOrUpdate($table,$params);
 		$stmt = sprintf(
 			'INSERT INTO `%s` (%s) VALUES (%s)'
 			,$table
@@ -102,16 +103,35 @@ class Db {
 		$this->run($stmt,array_values($params));
 		return $this->lastInsertId();
 	}
+	
+	protected function insertOrUpdate($table,$params=array()){
+		$stmt = sprintf(
+			'INSERT INTO `%s` (%s) VALUES (%s) ON DUPLICATE KEY UPDATE %s'
+			,$table
+			,rtrim('`'.implode('`,`',array_keys($params)),'`,').'`'
+			,rtrim(str_repeat('?,',count($params)),',')
+			,rtrim('`'.implode('` = ?, `',array_keys($params)),', `').'` = ?'
+		);
+		var_dump($stmt);
+		$this->run($stmt,array_merge(array_values($params),array_values($params)));
+		return $this->lastInsertId();
+	}
 
-	public function update($table,$primary_key,$primary_key_value,$params=array()){
+	public function update($table,$primary_key,$primary_key_value=null,$params=array()){
 		if(!count($params)) throw new Exception('No data provided for update to: '.$table);
+		if(is_array($primary_key)){
+			$key_stmt = rtrim('`'.implode('` = ? AND `',array_keys($primary_key)),',AND `').'` = ?';
+			$params = array_merge(array_values($primary_key),$primary_key_value);
+		} else {
+			$key_stmt = $primary_key.' = ?';
+		}
 		$stmt = sprintf(
 			'UPDATE `%s` SET %s WHERE `%s` = ?'
 			,$table
 			,rtrim('`'.implode('` = ?, `',array_keys($params)),',`').'` = ?'
 			,$primary_key
 		);
-		array_push($params,$primary_key_value);
+		if(!is_array($primary_key)) $params[] = $primary_key_value;
 		return $this->run($stmt,array_values($params));
 	}
 
