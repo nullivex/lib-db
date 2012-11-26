@@ -86,6 +86,25 @@ class Db {
 		static $inst = false;
 	}
 
+	public static function prepwhere($pairs=array(),$bool='AND'){
+		// $pairs is an assoc array of [column_name]=>[value] such as array('age'=>21,'email'=>'jdoe@example.org')
+		// $bool  can be any valid SQL WHERE clause boolean comparator (default: 'AND')
+		// returns an array, with members:
+		//     [0] <string> the resulting WHERE query; compiled for use with PDO::prepare including leading space (ready-to-use)
+		//     [n] <array>  the values array; ready for use with PDO::execute
+		if(!count($pairs)) return array('',null);
+		$cols = array();
+		$vals = array();
+		foreach($pairs as $col=>$val){
+			$cols[] = $col.'=?';
+			$vals[] = $val;
+		}
+		array_unshift($vals,' WHERE '.implode(' '.$bool.' ',$cols));
+		unset($cols);
+		return $vals;
+	}
+
+
 	public function run($stmt,$params=array()){
 		$query = $this->prepare($stmt);
 		$query->execute($params);
