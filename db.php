@@ -21,10 +21,12 @@
 
 class Db {
 
-	const EXCEPTIONS = false;
+	const EXCEPTIONS = true;
 	const NO_EXCEPTIONS = false;
 	const FLATTEN = true;
 	const NO_FLATTEN = false;
+	const IS_NULL = 'IS NULL';
+	const IS_NOT_NULL = 'IS NOT NULL';
 
 	static $inst = false;
 
@@ -93,50 +95,64 @@ class Db {
 		static $inst = false;
 	}
 
-	// $pairs is an assoc array of [column_name]=>[value] [ex: array('age'=>21,'email'=>'jdoe@example.org')]
-	// $bool  can be either: (string) valid SQL WHERE clause boolean comparator [default: 'AND']
-	//                       (array)  array of strings like the above, to be used in order [ex: array('OR','AND','AND NOT')]
+	//Db::prepwhere(); Prepares WHERE strings to be used in queries
+	// $pairs	array of clauses which can be in 4 formats
+	//				1)	'field-name'	=>	array($bool='AND',$operator='=',$value)
+	//				2) 	'field-name'	=>	array($operator='=',$value) //bool defaults to AND
+	//				3)	'field-name'	=>	array($operator) //bool defaults to AND, value defaults to NULL
+	//				4)	'field-name'	=>	$value //bool defaults to AND, operator defaults to =
+	//				NOTE: use Db::IS_NULL and Db::IS_NOT_NULL for null value operators
+	// $type	specify the start of the string defaults to 'WHERE'
 	// returns an array, with members:
 	//     [0] <string> the resulting WHERE clause; compiled for use with PDO::prepare including leading space (ready-to-use)
 	//     [n] <array>  the values array; ready for use with PDO::execute
-	public static function prepwhere($pairs=array(),$bool='AND',$type='WHERE'){
+	public static function prepwhere($pairs=array(),$type='WHERE'){
 		if(!count($pairs)) return array('',null);
 		
-		//pad bools
-		if(is_array($bool)) foreach($bool as &$b) $b = '=? '.$b.' ';
-		else $bool = '=? '.$bool.' ';
-		//fill bools if not enough
-		if(is_array($bool) && ($ca = count($pairs) - ($cb = count($bool))) > 0){
-			$bool = array_merge($bool,array_fill($cb+1,$ca,$bool[($cb-1)]));
-			unset($ca,$cb);
-		}
-		//prepare clause
-		$clause = sprintf(' %s %s=?',$type,implodei($bool,self::escape(array_keys($pairs))));
-		return array_merge(array($clause),array_values($pairs));
-		
-		/*
-		//this is the old way
-		$cols = $vals = array();
-		foreach($pairs as $col=>$val){
-			$cols[] = self::escape($col).'=?';
-			// $cols[] = '`'.implode('`.`',explode('.',$col)).'`=?';
-			$vals[] = $val;
-		}
-		if(is_string($bool))
-			array_unshift($vals,' WHERE '.implode(' '.$bool.' ',$cols));
-		else if(is_array($bool)){
-			$clause = ' WHERE';
-			$boolptr = 0;
-			$maxptr = count($cols) - 1;
-			for($c = 0; $c < $maxptr; $c++){
-				$clause .= ' '.$col.' '.$bool[$boolptr];
-				if(++$boolptr > $maxptr) $boolptr = $maxptr;
+		$values = array();
+		$str = ' '.strtoupper($type).' ';
+		$fieldcnt = 0;
+		foreach($pairs as $field => $value){
+			//set defaults
+			$op = '=';
+			$bool = 'AND';
+			//handle advanced settings
+			switch((is_array($value) ? count($value) : false)){
+				case 3:
+					$bool 	= array_shift($value);
+					$op 	= array_shift($value);
+					$value 	= array_shift($value);
+					break;
+				case 2:
+					$op 	= array_shift($value);
+					$value 	= array_shift($value);
+					break;
+				case 1:
+					$op 	= array_shift($value);
+					$value 	= null;
+					break;
+				default:
+					//nothing
+					break;
 			}
-			$clause .= ' '.$cols[$maxptr];
-			array_unshift($clause);
+			//format properly
+			$bool = ($fieldcnt++==0)?'':' '.strtoupper($bool).' ';
+			$op = strtoupper($op);
+			//handle op and add to values if needed
+			switch($op){
+				case Db::IS_NULL:
+				case Db::IS_NOT_NULL:
+					//no action needed
+					break;
+				default:
+					$op .= '?';
+					$values[] = (string)$value;
+					break;
+			}
+			//concat
+			$str .= sprintf('%s%s%s',$bool,self::escape($field),$op);
 		}
-		return $vals;
-		*/
+		return array_merge(array($str),$values);
 	}
 	
 	public function run($stmt,$params=array()){
@@ -223,7 +239,7 @@ class Db {
 	}
 	
 	public static function escape($arr=array()){
-		if(!is_array($arr)) return '`'.$arr.'`';
+		if(!is_array($arr)) return '`'.implode('`.`',explode('.',$arr)).'`';
 		foreach($arr as &$f){
 			//join parts of an array into escaped fields
 			if(is_array($f)) $f = '`'.implode('`.`',$f).'`';
