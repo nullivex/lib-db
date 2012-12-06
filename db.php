@@ -21,12 +21,13 @@
 
 class Db {
 
-	const EXCEPTIONS = true;
+	const EXCEPTIONS 	= true;
 	const NO_EXCEPTIONS = false;
-	const FLATTEN = true;
-	const NO_FLATTEN = false;
-	const IS_NULL = 'IS NULL';
-	const IS_NOT_NULL = 'IS NOT NULL';
+	const FLATTEN 		= true;
+	const NO_FLATTEN 	= false;
+	const IS_NULL 		= 'IS NULL';
+	const IS_NOT_NULL 	= 'IS NOT NULL';
+	const IN			= 'IN';
 
 	static $inst = false;
 
@@ -143,6 +144,14 @@ class Db {
 				case Db::IS_NULL:
 				case Db::IS_NOT_NULL:
 					//no action needed
+					break;
+				case Db::IN:
+					if(is_array($value)){
+						$op .= '('.rtrim(str_repeat('?,',count($value)),',').') ';
+						foreach($value as $v) $values[] = $v;
+					} else {
+						$op .= '('.$value.')';
+					}
 					break;
 				default:
 					$op .= '?';
