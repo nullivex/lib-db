@@ -189,7 +189,7 @@ class Db {
 			,$table
 			,implodei(',',self::escape(array_keys($params)))
 			,rtrim(str_repeat('?,',count($params)),',')
-			,implodei('=?,',self::escape(array_keys($params)))
+			,implodei('=?,',self::escape(array_keys($params))).'=?'
 		);
 		$this->run($stmt,array_merge(array_values($params),array_values($params)));
 		return $this->lastInsertId();
