@@ -165,6 +165,7 @@ class Db {
 	}
 	
 	public function run($stmt,$params=array()){
+		if(!is_array($params)) $params = array($params);
 		if($this->debug) debug_dump($stmt,$params);
 		$query = $this->prepare($stmt);
 		$query->execute($params);
