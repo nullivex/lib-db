@@ -215,12 +215,12 @@ class Db {
 		return $this->run($stmt,array_values($params));
 	}
 
-	public function fetch($stmt,$params=array(),$throw_exception=false,$except_code=null,$flatten=false){
+	public function fetch($stmt,$params=array(),$throw_exception=Db::NO_EXCEPTIONS,$except_code=null,$flatten=Db::NO_FLATTEN){
 		if(is_array($stmt)) list($stmt,$params) = $stmt;
 		$query = $this->run($stmt,$params);
 		$result = $query->fetch();
 		$query->closeCursor();
-		if(((!is_array($result)) || (count($result)==0)) && $throw_exception !== false)
+		if(((!is_array($result)) || (count($result)==0)) && $throw_exception !== Db::NO_EXCEPTIONS)
 			throw new Exception($throw_exception,$except_code);
 		if($flatten && is_array($result) && (count($result)>0) && (count(array_keys($result)) == 1)){
 			$col = array_shift(array_keys($result));
@@ -229,11 +229,11 @@ class Db {
 		return $result;
 	}
 
-	public function fetchAll($stmt,$params=array(),$throw_exception=false,$except_code=null,$flatten=false){
+	public function fetchAll($stmt,$params=array(),$throw_exception=Db::NO_EXCEPTIONS,$except_code=null,$flatten=Db::NO_FLATTEN){
 		if(is_array($stmt)) list($stmt,$params) = $stmt;
 		$query = $this->run($stmt,$params);
 		$result = $query->fetchAll();
-		if(!$result && $throw_exception !== false) throw new Exception($throw_exception,$except_code);
+		if(!$result && $throw_exception !== Db::NO_EXCEPTIONS) throw new Exception($throw_exception,$except_code);
 		if($flatten && is_array($result) && (count($result)>0) && is_array($result[0]) && (count(array_keys($result[0])) == 1)){
 			$col = array_shift(array_keys($result[0]));
 			$arr = array();
@@ -243,7 +243,7 @@ class Db {
 		return $result;
 	}
 
-	public function __call($function_name, $parameters) {
+	public function __call($function_name,$parameters) {
 		if(!is_array($parameters)) $parameters = array();
 		return call_user_func_array(array($this->pdo, $function_name), $parameters);
 	}
