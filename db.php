@@ -258,5 +258,9 @@ class Db {
 		}
 		return $arr;
 	}
+	
+	public function __destruct(){
+		$this->pdo = null;
+	}
 
 }
