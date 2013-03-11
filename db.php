@@ -198,7 +198,7 @@ class Db {
 
 	public function update($table,$primary_key,$primary_key_value=null,$params=array()){
 		if(is_array($primary_key)){
-			$key_stmt = implodei('=? AND ',self::escape(array_keys($primary_key)));
+			$key_stmt = implodei('=? AND ',self::escape(array_keys($primary_key))).'=?';
 			$params = $primary_key_value;
 		} else {
 			$key_stmt = self::escape($primary_key).' =?';
