@@ -120,16 +120,16 @@ class Db {
 			//handle advanced settings
 			switch((is_array($value) ? count($value) : false)){
 				case 3:
-					$bool 	= array_shift($value);
-					$op 	= array_shift($value);
-					$value 	= array_shift($value);
+					$bool 	= mda_shift($value);
+					$op 	= mda_shift($value);
+					$value 	= mda_shift($value);
 					break;
 				case 2:
-					$op 	= array_shift($value);
-					$value 	= array_shift($value);
+					$op 	= mda_shift($value);
+					$value 	= mda_shift($value);
 					break;
 				case 1:
-					$op 	= array_shift($value);
+					$op 	= mda_shift($value);
 					$value 	= null;
 					break;
 				default:
@@ -223,7 +223,7 @@ class Db {
 		if(((!is_array($result)) || (count($result)==0)) && $throw_exception !== Db::NO_EXCEPTIONS)
 			throw new Exception($throw_exception,$except_code);
 		if($flatten && is_array($result) && (count($result)>0) && (count(array_keys($result)) == 1)){
-			$col = array_shift(array_keys($result));
+			$col = mda_shift(array_keys($result));
 			$result = $result[$col];
 		}
 		return $result;
@@ -235,7 +235,7 @@ class Db {
 		$result = $query->fetchAll();
 		if(!$result && $throw_exception !== Db::NO_EXCEPTIONS) throw new Exception($throw_exception,$except_code);
 		if($flatten && is_array($result) && (count($result)>0) && is_array($result[0]) && (count(array_keys($result[0])) == 1)){
-			$col = array_shift(array_keys($result[0]));
+			$col = mda_shift(array_keys($result[0]));
 			$arr = array();
 			foreach($result as $row) $arr[] = $row[$col];
 			$result = $arr;
