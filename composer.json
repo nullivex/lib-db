@@ -1,0 +1,28 @@
+{
+	 "name":				"openlss/lib-db"
+	,"homepage":			"http://openlss.org"
+	,"description":			"PDO wrapper library with helpers"
+	,"license":				"LGPLv2"
+	,"type":				"library"
+	,"keywords": [
+		 "database"
+		,"pdo"
+		,"database abstraction"
+		,"mysql"
+	]
+	,"authors": [
+		 {
+			 "name":		"Bryan Tong"
+			,"email":		"contact@nullivex.com"
+			,"homepage":	"http://bryantong.com"
+		}
+		,{
+			 "name":		"Tony Butler"
+			,"email":		"spudz76@gmail.com"
+			,"homepage":	"http://openlss.org"
+		}
+	]
+	,"require": {
+		"php":	">=5.3.*"
+	}
+}
