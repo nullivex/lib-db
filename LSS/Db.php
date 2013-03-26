@@ -20,6 +20,9 @@
  */
 namespace LSS;
 
+use \Exception;
+use \PDO;
+
 class Db {
 
 	const EXCEPTIONS 	= true;
