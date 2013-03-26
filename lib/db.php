@@ -97,7 +97,7 @@ class Db {
 		static $inst = false;
 	}
 
-	//Db::prepwhere(); Prepares WHERE strings to be used in queries
+	//Db::prepWhere(); Prepares WHERE strings to be used in queries
 	// $pairs	array of clauses which can be in 4 formats
 	//				1)	'field-name'	=>	array($bool='AND',$operator='=',$value)
 	//				2) 	'field-name'	=>	array($operator='=',$value) //bool defaults to AND
@@ -108,7 +108,7 @@ class Db {
 	// returns an array, with members:
 	//     [0] <string> the resulting WHERE clause; compiled for use with PDO::prepare including leading space (ready-to-use)
 	//     [n] <array>  the values array; ready for use with PDO::execute
-	public static function prepwhere($pairs=array(),$type='WHERE'){
+	public static function prepWhere($pairs=array(),$type='WHERE'){
 		if(!count($pairs)) return array('',null);
 		
 		$values = array();
@@ -163,6 +163,10 @@ class Db {
 			$str .= sprintf('%s%s%s',$bool,self::escape($field),$op);
 		}
 		return array_merge(array($str),$values);
+	}
+	// DEPRECATED - prepwhere() is here as glue until all refs are converted
+	public static function prepwhere($pairs=array(),$type='WHERE'){
+		return $this->prepWhere($pairs,$type);
 	}
 	
 	public function run($stmt,$params=array()){
