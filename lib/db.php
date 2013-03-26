@@ -165,9 +165,6 @@ class Db {
 		return array_merge(array($str),$values);
 	}
 	// DEPRECATED - prepwhere() is here as glue until all refs are converted
-	public static function prepwhere($pairs=array(),$type='WHERE'){
-		return $this->prepWhere($pairs,$type);
-	}
 	
 	public function run($stmt,$params=array()){
 		if(!is_array($params)) $params = array($params);
