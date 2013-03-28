@@ -10,8 +10,6 @@ Usage
 ====
 
 ```php
-ld('db');
-
 //connect
 Db::_get()->setConfig($dbconfig)->connect();
 
