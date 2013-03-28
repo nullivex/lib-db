@@ -84,9 +84,9 @@ Updates a record in the database
 Fetches a single row from a query and returns the result
   * $stmt				The SQL query
   * $params				Parameters to be bound to the query
-  * $throw_exception	When set to DB::EXCEPTIONS will throw an exception on result not found
+  * $throw_exception	When set to Db::EXCEPTIONS will throw an exception on result not found
   * $except_cde			Code to be throw with the exception
-  * $flatten			When set to DB::FLATTEN will return an array of values from a specific column
+  * $flatten			When set to Db::FLATTEN will return an array of values from a specific column
 
 ### (array result) Db::fetchAll($stmt,$params=array(),$throw_exception=Db::NO_EXCEPTIONS,$except_code=null,$flatten=Db::NO_FLATTEN)
 Same as fetch but returns all results in an array
