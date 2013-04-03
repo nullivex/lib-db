@@ -24,10 +24,7 @@
 	]
 	,"require": {
 		 "php":					">=5.3.2"
-		,"openlss/func-mda":	">=0.0.1"
-	}
-	,"require-dev": {
-		 "openlss/func-mda":	"dev-master"
+		,"openlss/func-mda":	"~0.0.1"
 	}
 	,"autoload": {
 		"psr-0": {
