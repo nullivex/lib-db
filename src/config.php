@@ -19,9 +19,11 @@
  *	If not, see <http://www.gnu.org/licenses/>.
  */
 
+//db
+$config['db']['driver'] = 'mysql';
 $config['db']['host'] = 'localhost';
-$config['db']['port'] = 3306;
+$config['db']['port'] = '';
 $config['db']['user'] = 'root';
 $config['db']['password'] = '';
-$config['db']['database'] = 'openlss';
+$config['db']['database'] = 'lss';
 
