@@ -27,3 +27,6 @@ $config['db']['user'] = 'root';
 $config['db']['password'] = '';
 $config['db']['database'] = 'lss';
 
+\LSS\Config::setDefaults($config);
+unset($config);
+
