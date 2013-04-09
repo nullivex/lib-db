@@ -39,7 +39,7 @@ class Db {
 	private $pdo;
 	private $connected = false;
 	private $query_count = 0;
-	
+
 	public $debug = false;
 
 	public static function _get(){
@@ -113,7 +113,7 @@ class Db {
 	//     [n] <array>  the values array; ready for use with PDO::execute
 	public static function prepWhere($pairs=array(),$type='WHERE'){
 		if(!count($pairs)) return array('',null);
-		
+
 		$values = array();
 		$str = ' '.strtoupper($type).' ';
 		$fieldcnt = 0;
@@ -167,7 +167,7 @@ class Db {
 		}
 		return array_merge(array($str),$values);
 	}
-	
+
 	public function run($stmt,$params=array()){
 		if(!is_array($params)) $params = array($params);
 		if($this->debug) debug_dump($stmt,$params);
@@ -187,7 +187,7 @@ class Db {
 		$this->run($stmt,array_values($params));
 		return $this->lastInsertId();
 	}
-	
+
 	protected function insertOrUpdate($table,$params=array()){
 		$stmt = sprintf(
 			'INSERT INTO `%s` (%s) VALUES (%s) ON DUPLICATE KEY UPDATE %s'
@@ -251,7 +251,7 @@ class Db {
 		if(!is_array($parameters)) $parameters = array();
 		return call_user_func_array(array($this->pdo, $function_name), $parameters);
 	}
-	
+
 	public static function escape($arr=array()){
 		if(!is_array($arr)) return '`'.implode('`.`',explode('.',$arr)).'`';
 		foreach($arr as &$f){
@@ -262,7 +262,7 @@ class Db {
 		}
 		return $arr;
 	}
-	
+
 	public function __destruct(){
 		$this->pdo = null;
 	}
