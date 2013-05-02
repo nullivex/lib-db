@@ -32,6 +32,7 @@ class Db {
 	const IS_NULL 		= 'IS NULL';
 	const IS_NOT_NULL 	= 'IS NOT NULL';
 	const IN			= 'IN';
+	const BETWEEN		= 'BETWEEN';
 
 	static $inst = false;
 
@@ -107,6 +108,7 @@ class Db {
 	//				3)	'field-name'	=>	array($operator) //bool defaults to AND, value defaults to NULL
 	//				4)	'field-name'	=>	$value //bool defaults to AND, operator defaults to =
 	//				NOTE: use Db::IS_NULL and Db::IS_NOT_NULL for null value operators
+	//				      use Db::BETWEEN with $value of array(<begin>,<end>)
 	// $type	specify the start of the string defaults to 'WHERE'
 	// returns an array, with members:
 	//     [0] <string> the resulting WHERE clause; compiled for use with PDO::prepare including leading space (ready-to-use)
@@ -157,13 +159,20 @@ class Db {
 						$op .= '('.$value.')';
 					}
 					break;
+				case Db::BETWEEN:
+					if(is_array($value) && (count($value) == 2)){
+						$op .= ' ? AND ?';
+						$values[] = $value[0];
+						$values[] = $value[1];
+					}
+					break;
 				default:
-					$op .= '?';
+					$op .= ' ?';
 					$values[] = (string)$value;
 					break;
 			}
 			//concat
-			$str .= sprintf('%s%s%s',$bool,self::escape($field),$op);
+			$str .= sprintf('%s%s %s',$bool,self::escape($field),$op);
 		}
 		return array_merge(array($str),$values);
 	}
